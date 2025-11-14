@@ -36,7 +36,7 @@ void setError (error_t error)
 
 void printErrors()
 {
-    fprintf(stderr, "LIST OF ERROR: \n");
+    if (errors[HAVE_NO_ERRORS].isError == false) fprintf(stderr, "LIST OF ERROR: \n");
     for (int index = 1; index < NUMBER_ERRORS; index++)
     {
         if (errors[index].isError)
@@ -51,14 +51,14 @@ void printErrors()
 isError_t treeVerify (tree_t* tree, const char* file_name, const char* func_name, int line)
 {
     int global_code_error = 0;
-    func_data f_data = {file_name, func_name, line};
+    //func_data f_data = {file_name, func_name, line};
     if (tree == nullptr)
     {
         count_log_files++;
         errors[HAVE_NO_ERRORS].isError      = false;
         errors[ERR_FAIL_INIT_TREE].isError  = true;
         global_code_error |= code_ERR_FAIL_INIT_TREE;
-        treeDump(tree, &f_data, global_code_error, count_log_files, nullptr, "ERROR %d", global_code_error);
+        treeDump(tree, file_name, func_name, line, global_code_error, count_log_files, nullptr, "ERROR %d", global_code_error);
         return HAVE_ERROR;
     }
     if (tree->size < 0)
@@ -67,7 +67,7 @@ isError_t treeVerify (tree_t* tree, const char* file_name, const char* func_name
         errors[HAVE_NO_ERRORS].isError = false;
         errors[ERR_INV_SIZE].isError   = true;
         global_code_error |= code_ERR_INV_SIZE;
-        treeDump(tree, &f_data, global_code_error, count_log_files, nullptr, "ERROR %d", global_code_error);
+        treeDump(tree, file_name, func_name, line, global_code_error, count_log_files, nullptr, "ERROR %d", global_code_error);
         return HAVE_ERROR;
     }
 
@@ -79,13 +79,13 @@ isError_t treeVerify (tree_t* tree, const char* file_name, const char* func_name
         count_log_files++;
         setError(ERR_CYCLE);
         global_code_error |= code_ERR_CYCLE;
-        treeDump(tree, &f_data, global_code_error, count_log_files, nullptr, "ERROR %d", global_code_error);
+        treeDump(tree, file_name, func_name, line, global_code_error, count_log_files, nullptr, "ERROR %d", global_code_error);
         return HAVE_ERROR;
     }
 
     if (errors[HAVE_NO_ERRORS].isError == false)
     {
-        treeDump(tree, &f_data, global_code_error, count_log_files, nullptr, "ERROR %d", global_code_error);
+        treeDump(tree, file_name, func_name, line, global_code_error, count_log_files, nullptr, "ERROR %d", global_code_error);
         return HAVE_ERROR;
     }
 
@@ -116,13 +116,17 @@ isError_t nodeVerify (node_t* node, node_t** visited_nodes, int* counter)
 
 }
 
-void treeDump (tree_t* tree, func_data* f_data, int global_code_error, int count_log_files, node_t* deleted_node, const char* reason, ...)
+void treeDump (tree_t* tree, const char* file_name, const char* func_name, int line,
+               int global_code_error, int count_log_files, node_t* deleted_node, const char* reason, ...)
 {
     FILE* log_file_html = fopen("graphDump.html", "a");
     #ifndef NDEBUG
-    assert(log_file_html && f_data);
+    assert(log_file_html && file_name && func_name);
     #endif
-    printStartDump(log_file_html, f_data, count_log_files);
+
+    func_data f_data = {file_name, func_name, line};
+
+    printStartDump(log_file_html, &f_data, count_log_files);
 
     char formatted_reason[200] = {};
     va_list args = NULL;
@@ -131,7 +135,6 @@ void treeDump (tree_t* tree, func_data* f_data, int global_code_error, int count
     va_end(args);
     fprintf(log_file_html, "<p style=\"color: #0e450cff;\">%s</p>\n", formatted_reason);
 
-    //printReasonDump(log_file_html, mode);
     if (tree == nullptr)
     {
         fprintf(log_file_html, "Tree [%p]\n", tree);

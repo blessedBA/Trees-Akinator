@@ -1,3 +1,4 @@
+#include "akinator.h"
 #include "graphDebug.h"
 #include "tree.h"
 #include "safetyTree.h"
@@ -113,10 +114,20 @@ void creatMainNodes (FILE* log_file, tree_t* tree, node_t* node, node_t* deleted
         fill_color = "#C0DCC0";
         color      = "#ffffffff";
     }
+    printf("node->object in creatMainNodes = %s\n", node->object);
+    if (node->status != OBJECT)
+    {
     fprintf(log_file,
-                "node%p [shape=Mrecord; style = filled; fillcolor = \"%s\"; color = \"%s\"; label = \"{ adress = %p | { data = %d | father = %p } | { left = %p | right = %p } }\"]\n",
-                node, fill_color, color, node, node->value, node->father, node->left, node->right);
-
+                "node%p [shape=Mrecord; style = filled; fillcolor = \"%s\"; color = \"%s\"; label = \"{ %s | { YES | NO } }\"]\n",
+                node, fill_color, color, node->object);
+                // fwrite((node->object),  , 1, stdout);
+    }
+    else
+    {
+        fprintf(log_file,
+                "node%p [shape=Mrecord; style = filled; fillcolor = \"%s\"; color = \"%s\"; label = \"{ %s | { null | null } }\"]\n",
+                node, fill_color, color, node->object);
+    }
     if (node->left  == nullptr && node->right == nullptr) return;
     creatMainNodes(log_file, tree, node->left,  deleted_node);
     creatMainNodes(log_file, tree, node->right, deleted_node);
@@ -139,12 +150,12 @@ void creatRibs (FILE* log_file, tree_t* tree, node_t* node)
     if (node->left == nullptr && node->right == nullptr) return;
     if (node->left && node == node->left->father)
     {
-        fprintf(log_file, "node%p->node%p[label = \"left\", color = \"blue\", dir = \"both\" weight = 50];\n", node, node->left);
+        fprintf(log_file, "node%p->node%p[color = \"blue\", dir = \"both\" weight = 50];\n", node, node->left);
         creatRibs(log_file, tree, node->left);
     }
     if (node->right && node == node->right->father)
     {
-        fprintf(log_file, "node%p->node%p[label = \"right\", color = \"red\", dir = \"both\" weight = 50];\n", node, node->right);
+        fprintf(log_file, "node%p->node%p[color = \"red\", dir = \"both\" weight = 50];\n", node, node->right);
         creatRibs(log_file, tree, node->right);
     }
 

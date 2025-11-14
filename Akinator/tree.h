@@ -31,13 +31,22 @@ typedef enum mode_dump
     AFTER_DELETE  = 4
 } mode_dump;
 
+typedef enum answer_t
+{
+    ANS_NULL  = 0,
+    ANS_YES   = 1,
+    ANS_NO    = 2,
+    OBJECT    = 3
+} answer_t;
+
 typedef struct node_t
 {
-    node_t* node;
-    data_t  question;
-    node_t* left;
-    node_t* right;
-    node_t* father;
+    node_t*  node;
+    data_t   object;
+    node_t*  left;
+    node_t*  right;
+    node_t*  father;
+    answer_t status;
 } node_t;
 
 typedef struct tree_t
@@ -48,15 +57,12 @@ typedef struct tree_t
 
 
 tree_t*   treeInit ();
-isError_t nodeInit (tree_t* tree, node_t* node, side_t side, data_t value);
-isError_t treeInsert (tree_t* tree, node_t* node, data_t number);
+isError_t nodeInit (tree_t* tree, node_t* node, side_t side, data_t object, data_t question);
 isError_t nodeDestroy (node_t* node, int rank);
 
 void printNode          (const node_t* node, int rank, mode_print mode);
 void printNodePREorder  (const node_t* node, int rank);
 void printNodePOSTorder (const node_t* node, int rank);
 void printNodeINorder   (const node_t* node, int rank);
-
-isError_t sortArray(tree_t* tree, int* array, int n);
 
 #endif // TREE_H

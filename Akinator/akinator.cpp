@@ -1,0 +1,377 @@
+#include "akinator.h"
+#include "errors.h"
+#include "graphDebug.h"
+#include "safetyTree.h"
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
+#define BAD_VALUE -666
+
+isError_t guessObject (tree_t* tree, node_t* current_node, int* count_dumps)
+{
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    #endif
+
+    if (current_node->left  == nullptr && current_node->right == nullptr)
+    {
+        printf("IS YOUR ANSWER %s?\n", current_node->object);
+        while (checkFinalAnswerFromPerson(tree, current_node, count_dumps)) printf("please, answer \"no/NO\" or \"yes/YES\"\n");
+        return NO_ERRORS;
+    }
+    char answer[10] = "";
+    printf("%s?\n", current_node->object);
+
+    while (checkAnswer(tree, current_node, answer)) printf("please, answer \"no/NO\" or \"yes/YES\"\n");
+
+    switch (current_node->status)
+    {
+        case ANS_NULL:
+            fprintf(stderr, "something went wrong in %s %s:%d ...\n", __FILE__, __func__, __LINE__);
+            return HAVE_ERROR;
+            break;
+        case OBJECT:
+            fprintf(stderr, "something went wrong in %s %s:%d ...\n", __FILE__, __func__, __LINE__);
+            return HAVE_ERROR;
+            break;
+        case ANS_YES:
+            if (guessObject(tree, current_node->left, count_dumps))  return HAVE_ERROR;
+            break;
+        case ANS_NO:
+            if (guessObject(tree, current_node->right, count_dumps)) return HAVE_ERROR;
+            break;
+        default:
+            assert(0 && "holy shit, your tree is definitely WRONG");
+    }
+
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    #endif
+
+    return NO_ERRORS;
+}
+
+isError_t checkAnswer (tree_t* tree, node_t* current_node, char* answer)
+{
+    #ifndef NDEBUG
+    assert(answer);
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    #endif
+
+    bool isAnswerRight = false;
+
+    scanf("%s", answer);
+    if (strcmp(answer, "YES") == 0 || strcmp(answer, "yes") == 0)
+    {
+        current_node->status = ANS_YES;
+        isAnswerRight = true;
+    }
+    if (strcmp(answer, "NO") == 0 || strcmp(answer, "no") == 0)
+    {
+        current_node->status = ANS_NO;
+        isAnswerRight = true;
+    }
+
+    #ifndef NDEBUG
+    assert(answer);
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    #endif
+
+    return (isAnswerRight) ? NO_ERRORS : HAVE_ERROR;
+}
+
+isError_t checkFinalAnswerFromPerson (tree_t* tree, node_t* answer_node, int* count_dumps)
+{
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    assert(answer_node);
+    #endif
+
+    char answer[5] = "";
+    bool isAnswerRight = false;
+
+    scanf("%s", answer);
+
+    if (strcmp(answer, "YES") == 0 || strcmp(answer, "yes") == 0)
+    {
+        printf("thanks for work :)\n");
+        isAnswerRight = true;
+    }
+    else if (strcmp(answer, "NO") == 0 || strcmp(answer, "no") == 0)
+    {
+        printf("((((\n");
+        isAnswerRight = true;
+        treeDump(tree, __FILE__, __func__, __LINE__, NULL, ++*count_dumps, nullptr, "BEFORE %dth ADDING", *count_dumps);
+        addObject(tree, answer_node);
+        treeDump(tree, __FILE__, __func__, __LINE__, NULL, ++*count_dumps, nullptr, "AFTER %dth ADDING ", *count_dumps);
+    }
+
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    assert(answer_node);
+    #endif
+
+    return (isAnswerRight) ? NO_ERRORS : HAVE_ERROR;
+}
+
+isError_t addObject (tree_t* tree, node_t* node)
+{
+    #ifndef NDEBUG
+    treeVerify(tree,  __FILE__, __func__, __LINE__);
+    assert(node);
+    #endif
+
+    printf("do you want to add a new object?\n");
+    char answer[4] = "";
+    bool good_answer = false;
+
+    while (!good_answer && scanf("%s", answer))
+    {
+        if (strcmp(answer, "no")  == 0 || strcmp(answer, "NO")  == 0) return NO_ERRORS;
+        if (strcmp(answer, "yes") != 0 && strcmp(answer, "YES") != 0)
+        {
+            printf("please, answer \"no/NO\" or \"yes/YES\"\n");
+            continue;
+        }
+        good_answer = true;
+    }
+
+    char* new_object = (char*)calloc(30, sizeof(char));
+    printf("node->object = %s\n", node->object);
+    printf("print new object: ");
+
+    // skipString(stdin);
+    // fgets(new_object, sizeof(new_object), stdin);
+    scanf("%s", new_object);
+    printf("How is it different from %s? It ", node->object);
+
+    char* new_question = (char*)calloc(100, sizeof(char));
+    // skipString(stdin);
+    // fgets(new_question, sizeof(new_question), stdin);
+    scanf("%s", new_question);
+
+    printf("new_question = %s\n", new_question);
+    if (node == tree->root)
+    {
+        char* new_right_object = (char*)calloc(30, sizeof(char));
+        printf("also, I need the second object with non %s. It is ", new_question);
+        scanf("%s", new_right_object);
+        node->object = nullptr;
+        nodeInit(tree, node, RIGHT, new_right_object, new_question);
+    }
+    else nodeInit(tree, node, RIGHT, node->object, new_question);
+
+    nodeInit(tree, node, LEFT, new_object, new_question);
+    node->status = ANS_YES;
+    node->object = new_question;
+
+    printf("new_object = %s\n", new_object);
+    printf("node->object = %s\n", node->object);
+
+    #ifndef NDEBUG
+    treeVerify(tree,  __FILE__, __func__, __LINE__);
+    assert(node);
+    #endif
+
+    return NO_ERRORS;
+}
+
+void skipString (FILE* input_file)
+{
+    #ifndef NDEBUG
+    assert(input_file);
+    #endif
+
+    int ch = 0;
+    if ((ch = fgetc(input_file)) == '\n')
+    {
+        ungetc(ch, input_file);
+        return;
+    }
+    while ((ch = fgetc(input_file)) != '\n' && ch != EOF)
+        ;
+
+    #ifndef NDEBUG
+    assert(input_file);
+    #endif
+
+    return;
+}
+
+void startAkinator (tree_t* tree)
+{
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    #endif
+
+    func_data f_data = {__FILE__, __func__, __LINE__};
+    int global_code_error = 0;
+    int count_dumps = 0;
+    int answer = 0;
+
+    printf("Hello, this is Akinator. It will guess the person whom you will make a wish)\n\n");
+    usleep(1e6);
+
+    do
+    {
+        printStartOfAkinator();
+        while (!checkStartAnswer(&answer)) printf("please, enter 1, 2, 3 or 'q'\n");
+
+        switch (answer)
+        {
+            case GUESS_OBJ:
+                guessObject(tree, tree->root, &count_dumps);
+                break;
+            case ADD_OBJ:
+                printf("before adding new object we need to try to guess it :) \n");
+                guessObject(tree, tree->root, &count_dumps);
+                break;
+            case DUMP_TREE:
+                treeDump(tree, __FILE__, __func__, __LINE__, global_code_error, ++count_dumps, nullptr, "DUMP %d", count_dumps);
+                break;
+            case GIVE_DEF:
+                giveDefinition(tree);
+                break;
+            case EXIT:
+                printf("GOODBYE MEOW\n");
+                break;
+            default:
+                assert(0 && "fucking shit something went wrong...(invalid answer in function startAkinator");
+        }
+
+    }
+    while (answer != 'q');
+
+
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    #endif
+
+    return;
+}
+
+bool checkStartAnswer(int* answer)
+{
+    #ifndef NDEBUG
+    assert(answer);
+    #endif
+
+    char temp = 0;
+    skipString(stdin);
+    scanf("%c", &temp);
+    switch (temp)
+    {
+        case GUESS_OBJ:
+            *answer = GUESS_OBJ;
+            break;
+        case ADD_OBJ:
+            *answer = ADD_OBJ;
+            break;
+        case DUMP_TREE:
+            *answer = DUMP_TREE;
+            break;
+        case GIVE_DEF:
+            *answer = GIVE_DEF;
+            break;
+        case EXIT:
+            *answer = 'q'; // 'q' = \113
+            break;
+        default:
+            *answer = BAD_VALUE;
+    }
+
+    #ifndef NDEBUG
+    assert(answer);
+    #endif
+
+    return (*answer == BAD_VALUE) ? false : true;
+}
+
+void printStartOfAkinator ()
+{
+    printf("Please, choose an action: \n");
+    printf("1. guess a person\n");
+    printf("2. add a person\n");
+    printf("3. watch tree of akinator\n");
+    printf("4. get a definition of object\n");
+    printf("q. exit\n");
+
+    return;
+}
+
+void giveDefinition (tree_t* tree)
+{
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    #endif
+
+    char* object;
+    printf("\ndefinition of which object do you want to know?\n");
+    scanf("%s", object);
+
+    node_t* founded_node = (node_t*)calloc(1, sizeof(node_t));
+    assert(founded_node);
+    founded_node = findNode(tree, tree->root, object);
+
+    if (founded_node == nullptr) printf("\nthere is no such object in akinator data(\n");
+
+    printf("%s is ", object);
+    definitionInit(founded_node);
+
+    printf("thats all :)\n\n");
+
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    #endif
+
+    return;
+}
+
+node_t* findNode (tree_t* tree, node_t* current_node, const char* object)
+{
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    assert(object);
+    #endif
+
+    node_t* required_node = nullptr;
+
+    //if ((required_node = findNode(tree, current_node, object))) return required_node;
+
+    if (current_node->left)
+    {
+        if ((required_node = findNode(tree, current_node->left,  object))) return required_node;
+    }
+    if (current_node->right)
+    {
+        if ((required_node = findNode(tree, current_node->right, object))) return required_node;
+    }
+
+    if (strcmp(current_node->object, object) == 0) return current_node;
+
+    #ifndef NDEBUG
+    treeVerify(tree, __FILE__, __func__, __LINE__);
+    assert(object);
+    #endif
+
+    return nullptr;
+}
+
+void definitionInit (node_t* current_node)
+{
+
+    if (current_node->father == nullptr) return;
+
+    if (current_node->father->left  == current_node) printf("%s, ",     current_node->father->object);
+    if (current_node->father->right == current_node) printf("not %s, ", current_node->father->object);
+
+    definitionInit(current_node->father);
+
+    return;
+}

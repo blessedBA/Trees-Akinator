@@ -110,6 +110,7 @@ isError_t nodeDestroy (node_t* node, int rank)
 
     return NO_ERRORS;
 }
+
 void printNode (const node_t* node, int rank, mode_print mode)
 {
     #ifndef NDEBUG
