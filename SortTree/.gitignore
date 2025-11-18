@@ -1,3 +1,6 @@
 *.dSYM
 *.out
 *.txt
+*.sh
+images
+dots

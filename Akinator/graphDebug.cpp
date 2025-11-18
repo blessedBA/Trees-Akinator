@@ -10,10 +10,9 @@
 FILE* creatDotFile (tree_t* tree, int count_log_files, node_t* deleted_node)
 {
     FILE* log_file = openLogFile(count_log_files);
-    #ifndef NDEBUG
+
     treeVerify(tree, __FILE__, __func__, __LINE__);
     assert(log_file);
-    #endif
 
     fprintf(log_file, "digraph tree {\n");
 
@@ -29,21 +28,17 @@ FILE* creatDotFile (tree_t* tree, int count_log_files, node_t* deleted_node)
 
 void creatLogPicture (FILE* log_file, tree_t* tree, int count_log_files)
 {
-    #ifndef NDEBUG
     assert(log_file && tree);
-    #endif
 
     char command[150] = {};
 
     snprintf(command, sizeof(command), "dot dots/logFile_%d.txt -T png -o images/logFile_%d.png", count_log_files, count_log_files);
     if (system(command) != 0)
     {
-        fprintf(stderr, "failed to creat dot picture number %d!!!\n", count_log_files);
+        fprintf(stderr, COLOR_BRED "failed to creat dot picture number %d!!!" COLOR_RESET "\n", count_log_files);
     }
 
-    #ifndef NDEBUG
     assert(log_file && tree);
-    #endif
 
     return;
 }
@@ -54,18 +49,14 @@ FILE* openLogFile (int count_log_files)
     snprintf(filename, sizeof(filename), "dots/logFile_%d.txt", count_log_files);
     FILE* log_file = fopen(filename, "w");
 
-    #ifndef NDEBUG
     assert(log_file);
-    #endif
 
     return log_file;
 }
 
 void creatStartGraph (FILE* log_file)
 {
-    #ifndef NDEBUG
     assert(log_file);
-    #endif
 
     fprintf(log_file, "\trankdir = TB;\n");
     fprintf(log_file, "\tsplines = true;\n");
@@ -74,19 +65,15 @@ void creatStartGraph (FILE* log_file)
     fprintf(log_file, "\tbgcolor = \"#cfa8ceff\"");
     fprintf(log_file, "\tnode [shape = Mrecord];\n");
 
-    #ifndef NDEBUG
     assert(log_file);
-    #endif
 
     return;
 }
 
 void creatMainNodes (FILE* log_file, tree_t* tree, node_t* node, node_t* deleted_node)
 {
-    #ifndef NDEBUG
     treeVerify(tree, __FILE__, __func__, __LINE__);
     assert(log_file);
-    #endif
 
     const char* fill_color = "";
     const char* color      = "";
@@ -120,32 +107,29 @@ void creatMainNodes (FILE* log_file, tree_t* tree, node_t* node, node_t* deleted
     fprintf(log_file,
                 "node%p [shape=Mrecord; style = filled; fillcolor = \"%s\"; color = \"%s\"; label = \"{ %s | { YES | NO } }\"]\n",
                 node, fill_color, color, node->object);
-                // fwrite((node->object),  , 1, stdout);
     }
     else
     {
         fprintf(log_file,
-                "node%p [shape=Mrecord; style = filled; fillcolor = \"%s\"; color = \"%s\"; label = \"{ %s | { null | null } }\"]\n",
-                node, fill_color, color, node->object);
+                "node%p [shape=Mrecord; style = filled; fillcolor = \"%s\"; color = \"%s\"; label = \"{ %s }\"]\n",
+                node, fill_color, color,  node->object);
     }
+    
     if (node->left  == nullptr && node->right == nullptr) return;
+
     creatMainNodes(log_file, tree, node->left,  deleted_node);
     creatMainNodes(log_file, tree, node->right, deleted_node);
 
-    #ifndef NDEBUG
     treeVerify(tree, __FILE__, __func__, __LINE__);
     assert(log_file && tree);
-    #endif
 
     return;
 }
 
 void creatRibs (FILE* log_file, tree_t* tree, node_t* node)
 {
-    #ifndef NDEBUG
     treeVerify(tree, __FILE__, __func__, __LINE__);
     assert(log_file && node);
-    #endif
 
     if (node->left == nullptr && node->right == nullptr) return;
     if (node->left && node == node->left->father)
@@ -159,36 +143,28 @@ void creatRibs (FILE* log_file, tree_t* tree, node_t* node)
         creatRibs(log_file, tree, node->right);
     }
 
-    #ifndef NDEBUG
     treeVerify(tree, __FILE__, __func__, __LINE__);
     assert(log_file && node);
-    #endif
 
     return;
 }
 
 isError_t clearFile (const char* file_name)
 {
-    #ifndef NDEBUG
     assert(file_name);
-    #endif
 
     FILE* file = fopen(file_name, "w");
     if (file == nullptr) return HAVE_ERROR;
     fclose(file);
 
-    #ifndef NDEBUG
     assert(file_name);
-    #endif
 
     return NO_ERRORS;
 }
 
 bool checkDeleted (node_t* node, node_t* deleted_node)
 {
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     bool isDeleted = false;
     if (deleted_node != nullptr)
@@ -203,9 +179,7 @@ bool checkDeleted (node_t* node, node_t* deleted_node)
         }
     }
 
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     return isDeleted;
 }

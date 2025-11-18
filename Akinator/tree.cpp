@@ -29,28 +29,25 @@ tree_t* treeInit ()
     tree->root   = root;
     tree->size   = 1;
     root->status = ANS_NULL;
-    #ifndef NDEBUG
+
     if (treeVerify(tree, __FILE__, __func__, __LINE__)) return nullptr;
-    #endif
 
     return tree;
 }
 
 isError_t nodeInit (tree_t* tree, node_t* node, side_t side, data_t object, data_t question)
 {
-    #ifndef NDEBUG
     if (treeVerify(tree, __FILE__, __func__, __LINE__)) return HAVE_ERROR;
     assert(node);
-    #endif
 
     node_t* new_node = (node_t*)calloc(1, sizeof(node_t));
     assert(new_node);
     char* old_object = node->object;
-    printf("old_object in nodeInit = %s\n", old_object);
+    //printf("old_object in nodeInit = %s\n", old_object);
     if (node->object != nullptr) node->object = question;
 
-    printf("question in nodeInit = %s\n", question);
-    printf("\n\n");
+    //printf("question in nodeInit = %s\n", question);
+    //printf("\n\n");
     new_node->status = OBJECT;
     switch (side)
     {
@@ -61,7 +58,7 @@ isError_t nodeInit (tree_t* tree, node_t* node, side_t side, data_t object, data
         case RIGHT:
             if (node->object == nullptr) // for the first initialization in main
             {
-                printf("PENIS\n");
+                //printf("PENIS\n");
                 new_node->object = object;
                 node->right = new_node;
                 break;
@@ -74,23 +71,19 @@ isError_t nodeInit (tree_t* tree, node_t* node, side_t side, data_t object, data
     }
     new_node->father = node;
     tree->size++;
-    printf("new_node->object = %s\n", new_node->object);
-    printf("node->object     = %s\n", node->object);
-    printf("1111111\n");
-    printf("\n\n");
-    #ifndef NDEBUG
+    //printf("new_node->object = %s\n", new_node->object);
+    //printf("node->object     = %s\n", node->object);
+    //printf("1111111\n");
+    //printf("\n\n");
     if (treeVerify(tree, __FILE__, __func__, __LINE__)) return HAVE_ERROR;
     assert(node);
-    #endif
 
     return NO_ERRORS;
 }
 
 isError_t nodeDestroy (node_t* node, int rank)
 {
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     if (node->left)  nodeDestroy(node->left,  rank + 1);
     if (node->right) nodeDestroy(node->right, rank + 1);
@@ -112,9 +105,7 @@ isError_t nodeDestroy (node_t* node, int rank)
 }
 void printNode (const node_t* node, int rank, mode_print mode)
 {
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     switch (mode)
     {
@@ -131,18 +122,14 @@ void printNode (const node_t* node, int rank, mode_print mode)
             fprintf(stderr, "invalid mode of printTree!!\n");
     }
 
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     return;
 }
 
 void printNodePREorder (const node_t* node, int rank)
 {
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     printf("(");
     printf("\"%s\"", node->object);
@@ -151,18 +138,14 @@ void printNodePREorder (const node_t* node, int rank)
     printf("nil nil");
     printf(")");
 
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     return;
 }
 
 void printNodePOSTorder (const node_t* node, int rank)
 {
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     printf("(");
     if (node->left)  printNodePOSTorder(node->left,  rank + 1);
@@ -170,18 +153,14 @@ void printNodePOSTorder (const node_t* node, int rank)
     printf("%s", node->object);
     printf(")");
 
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     return;
 }
 
 void printNodeINorder (const node_t* node, int rank)
 {
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     //printf("(");
     if (node->left)  printNodeINorder(node->left,  rank + 1);
@@ -189,9 +168,7 @@ void printNodeINorder (const node_t* node, int rank)
     if (node->right) printNodeINorder(node->right, rank + 1);
     //printf(")");
 
-    #ifndef NDEBUG
     assert(node);
-    #endif
 
     return;
 }

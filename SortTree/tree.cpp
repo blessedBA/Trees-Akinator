@@ -48,8 +48,8 @@ isError_t nodeInit (tree_t* tree, node_t* node, side_t side, data_t value)
             node->left = new_node;
             break;
         case RIGHT:
-        node->right = new_node;
-        break;
+            node->right = new_node;
+            break;
         default:
             assert(0 && "invalid side for adding new node\n");
     }

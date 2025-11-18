@@ -17,9 +17,6 @@ int main()
     func_data f_data = {__FILE__, __func__, __LINE__};
     int global_code_error = 0;
     int count_dumps = 0;
-    printf("\a\a\a\a\a\a\a\a\a\a\a\a\a\a\a\a\a");
-    int huy[] = {5, 3, 7, 12, 54, -12, -5, 0, 3, -123, 32, 1235, 654, -432, -1, 1, 5, 5};
-    int n = (int)(sizeof(huy) / sizeof(huy[0]));
     nodeInit(tree, tree->root, LEFT,  10);
     nodeInit(tree, tree->root, RIGHT, 20);
     nodeInit(tree, tree->root->left,  RIGHT, 30);

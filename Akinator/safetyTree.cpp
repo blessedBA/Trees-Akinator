@@ -1,3 +1,4 @@
+#include "colours.h"
 #include "errors.h"
 #include "graphDebug.h"
 #include "safetyTree.h"
@@ -36,18 +37,19 @@ void setError (error_t error)
 
 void printErrors()
 {
-    if (errors[HAVE_NO_ERRORS].isError == false) fprintf(stderr, "LIST OF ERROR: \n");
+    if (errors[HAVE_NO_ERRORS].isError == false) fprintf(stderr, COLOR_YELLOW "LIST OF ERROR: " COLOR_RESET "\n");
     for (int index = 1; index < NUMBER_ERRORS; index++)
     {
         if (errors[index].isError)
         {
-            fprintf(stderr, "ERROR: %s\n", errors[index].description);
+            fprintf(stderr, COLOR_BRED "ERROR: " COLOR_RESET "%s\n", errors[index].description);
         }
     }
 
     return;
 }
 
+#ifndef NDEBUG
 isError_t treeVerify (tree_t* tree, const char* file_name, const char* func_name, int line)
 {
     int global_code_error = 0;
@@ -92,6 +94,14 @@ isError_t treeVerify (tree_t* tree, const char* file_name, const char* func_name
     return NO_ERRORS;
 }
 
+#else
+
+isError_t treeVerify (tree_t* tree, const char* file_name, const char* func_name, int line)
+{
+    return NO_ERRORS;
+}
+
+#endif
 isError_t nodeVerify (node_t* node, node_t** visited_nodes, int* counter)
 {
     if (node == nullptr) return NO_ERRORS;
@@ -112,17 +122,14 @@ isError_t nodeVerify (node_t* node, node_t** visited_nodes, int* counter)
 
     if (verifyLeft == NO_ERRORS) return verifyRight;
     else                         return verifyLeft;
-
-
 }
 
 void treeDump (tree_t* tree, const char* file_name, const char* func_name, int line,
                int global_code_error, int count_log_files, node_t* deleted_node, const char* reason, ...)
 {
     FILE* log_file_html = fopen("graphDump.html", "a");
-    #ifndef NDEBUG
+
     assert(log_file_html && file_name && func_name);
-    #endif
 
     func_data f_data = {file_name, func_name, line};
 
@@ -175,18 +182,14 @@ void printStartDump (FILE* log_file_html, func_data* f_data, int count_log_files
     fprintf(log_file_html, "DUMP NUMBER %d\n", count_log_files);
     fprintf(log_file_html, "-----------------------------------TreeDump------------------------\n\n");
 
-    #ifndef NDEBUG
     assert(log_file_html && f_data);
-    #endif
 
     return;
 }
 
 void printErrorsInLog (FILE* log_file_html, int global_code_error)
 {
-    #ifndef NDEBUG
     assert(log_file_html);
-    #endif
 
     if (global_code_error)
     {
@@ -201,18 +204,14 @@ void printErrorsInLog (FILE* log_file_html, int global_code_error)
         }
     }
 
-    #ifndef NDEBUG
     assert(log_file_html);
-    #endif
 
     return;
 }
 
 void printMainInfoTree (FILE* log_file_html, tree_t* tree)
 {
-    #ifndef NDEBUG
     assert(log_file_html && tree);
-    #endif
 
     fprintf(log_file_html, "tree [%p]:\n", tree);
     fprintf(log_file_html, "size = %zu\n", tree->size);
@@ -222,25 +221,19 @@ void printMainInfoTree (FILE* log_file_html, tree_t* tree)
 
 void printImage (FILE* log_file_html, int count_log_files)
 {
-    #ifndef NDEBUG
     assert(log_file_html);
-    #endif
 
     fprintf(log_file_html, "IMAGE\n");
     fprintf(log_file_html, "<img src=\"./images/logFile_%d.png\" width=\"%d\" alt=\"DUMP %d\"/>\n\n", count_log_files, 1000, count_log_files);
 
-    #ifndef NDEBUG
     assert(log_file_html);
-    #endif
 
     return;
 }
 
 void printReasonDump (FILE* log_file_html, mode_dump mode)
 {
-    #ifndef NDEBUG
     assert(log_file_html);
-    #endif
 
     switch (mode)
     {
@@ -262,9 +255,7 @@ void printReasonDump (FILE* log_file_html, mode_dump mode)
             setError(ERR_INV_REASON_FOR_DUMP);
     }
 
-    #ifndef NDEBUG
     assert(log_file_html);
-    #endif
 
     return;
 }

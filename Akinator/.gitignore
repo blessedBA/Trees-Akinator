@@ -2,4 +2,7 @@
 *.out
 *.txt
 *.png
-
+colors.h
+*.sh
+images
+dots
