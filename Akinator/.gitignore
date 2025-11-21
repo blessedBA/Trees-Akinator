@@ -6,3 +6,4 @@ colors.h
 *.sh
 images
 dots
+leaks.trace

@@ -1,4 +1,5 @@
 #include "akinator.h"
+#include "colors.h"
 #include "graphDebug.h"
 #include "tree.h"
 #include "safetyTree.h"
@@ -7,7 +8,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-FILE* creatDotFile (tree_t* tree, int count_log_files, node_t* deleted_node)
+static FILE* openLogFile (int count_log_files);
+static void creatStartGraph (FILE* log_file);
+static void creatMainNodes (FILE* log_file, const tree_t* tree, node_t* node, node_t* deleted_node);
+static void creatRibs (FILE* log_file, const tree_t* tree, node_t* node);
+static bool checkDeleted (node_t* node, node_t* deleted_node);
+static bool IsNodeInSubtree (node_t* root, node_t* node);
+
+FILE* creatDotFile (const tree_t* tree, int count_log_files, node_t* deleted_node)
 {
     FILE* log_file = openLogFile(count_log_files);
 
@@ -26,13 +34,14 @@ FILE* creatDotFile (tree_t* tree, int count_log_files, node_t* deleted_node)
     return log_file;
 }
 
-void creatLogPicture (FILE* log_file, tree_t* tree, int count_log_files)
+void creatLogPicture (FILE* log_file, const tree_t* tree, int count_log_files)
 {
     assert(log_file && tree);
 
     char command[150] = {};
 
     snprintf(command, sizeof(command), "dot dots/logFile_%d.txt -T png -o images/logFile_%d.png", count_log_files, count_log_files);
+
     if (system(command) != 0)
     {
         fprintf(stderr, COLOR_BRED "failed to creat dot picture number %d!!!" COLOR_RESET "\n", count_log_files);
@@ -70,7 +79,7 @@ void creatStartGraph (FILE* log_file)
     return;
 }
 
-void creatMainNodes (FILE* log_file, tree_t* tree, node_t* node, node_t* deleted_node)
+void creatMainNodes (FILE* log_file, const tree_t* tree, node_t* node, node_t* deleted_node)
 {
     treeVerify(tree, __FILE__, __func__, __LINE__);
     assert(log_file);
@@ -114,7 +123,7 @@ void creatMainNodes (FILE* log_file, tree_t* tree, node_t* node, node_t* deleted
                 "node%p [shape=Mrecord; style = filled; fillcolor = \"%s\"; color = \"%s\"; label = \"{ %s }\"]\n",
                 node, fill_color, color,  node->object);
     }
-    
+
     if (node->left  == nullptr && node->right == nullptr) return;
 
     creatMainNodes(log_file, tree, node->left,  deleted_node);
@@ -126,7 +135,7 @@ void creatMainNodes (FILE* log_file, tree_t* tree, node_t* node, node_t* deleted
     return;
 }
 
-void creatRibs (FILE* log_file, tree_t* tree, node_t* node)
+void creatRibs (FILE* log_file, const tree_t* tree, node_t* node)
 {
     treeVerify(tree, __FILE__, __func__, __LINE__);
     assert(log_file && node);
@@ -147,19 +156,6 @@ void creatRibs (FILE* log_file, tree_t* tree, node_t* node)
     assert(log_file && node);
 
     return;
-}
-
-isError_t clearFile (const char* file_name)
-{
-    assert(file_name);
-
-    FILE* file = fopen(file_name, "w");
-    if (file == nullptr) return HAVE_ERROR;
-    fclose(file);
-
-    assert(file_name);
-
-    return NO_ERRORS;
 }
 
 bool checkDeleted (node_t* node, node_t* deleted_node)

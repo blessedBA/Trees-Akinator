@@ -18,16 +18,16 @@ typedef enum mode_T
 
 
 isError_t guessObject (tree_t* tree, node_t* node, int* count_dumps);
-void checkAnswer (tree_t* tree, node_t* current_node);
+void checkAnswer (node_t* current_node);
 void checkFinalAnswerFromPerson (tree_t* tree, node_t* answer_node, int* count_dumps);
 isError_t addObject (tree_t* tree, node_t* node);
 void skipString (FILE* input_file);
 void startAkinator (tree_t* tree);
 bool checkStartAnswer(int* answer);
 void printStartOfAkinator ();
-void giveDefinition (tree_t* tree);
-node_t* findNode (tree_t* tree, node_t* current_node, const char* object);
-void definitionInit (node_t* current_node);
+void giveDefinition (const tree_t* tree);
+node_t* findNode (const tree_t* tree, node_t* current_node, const char* object);
+void definitionInit (const node_t* current_node);
 void startDeletingElement (tree_t* tree);
 
 

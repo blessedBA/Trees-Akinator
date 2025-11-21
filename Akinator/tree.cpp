@@ -10,6 +10,8 @@
 #define ROOT 0
 #define BAD_VALUE -666
 #define BAD_QUESTION "there is no question!!!"
+#define TREE_VERIFY treeVerify(tree, __FILE__, __func__, __LINE__)
+
 
 tree_t* treeInit ()
 {
@@ -19,7 +21,6 @@ tree_t* treeInit ()
         return nullptr;
     }
     node_t* root = (node_t*)calloc(1, sizeof(node_t));
-    root->node   = root;
     char* start_question = (char*)calloc(10, sizeof(char));
     start_question = "nothing";
     root->object = start_question;
@@ -33,6 +34,18 @@ tree_t* treeInit ()
     if (treeVerify(tree, __FILE__, __func__, __LINE__)) return nullptr;
 
     return tree;
+}
+
+node_t* creatNode() // for reading from file
+{
+    node_t* node = (node_t*)calloc(1, sizeof(node_t));
+    assert(node);
+    node->father = nullptr;
+    node->left = nullptr;
+    node->right = nullptr;
+    node->status = ANS_NULL;
+
+    return node;
 }
 
 isError_t nodeInit (tree_t* tree, node_t* node, side_t side, data_t object, data_t question)
@@ -81,12 +94,14 @@ isError_t nodeInit (tree_t* tree, node_t* node, side_t side, data_t object, data
     return NO_ERRORS;
 }
 
-isError_t nodeDestroy (node_t* node, int rank)
+isError_t nodeDestroy (tree_t* tree, node_t* node, int rank)
 {
+    treeVerify(tree, __FILE__, __func__, __LINE__);
     assert(node);
 
-    if (node->left)  nodeDestroy(node->left,  rank + 1);
-    if (node->right) nodeDestroy(node->right, rank + 1);
+    tree->size--;
+    if (node->left)  nodeDestroy(tree, node->left,  rank + 1);
+    if (node->right) nodeDestroy(tree, node->right, rank + 1);
 
     if (node->father != nullptr)
     {
@@ -172,5 +187,3 @@ void printNodeINorder (const node_t* node, int rank)
 
     return;
 }
-
-

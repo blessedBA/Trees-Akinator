@@ -1,4 +1,4 @@
-#include "colours.h"
+#include "colors.h"
 #include "errors.h"
 #include "graphDebug.h"
 #include "safetyTree.h"
@@ -10,6 +10,12 @@
 #include <stdarg.h>
 
 #define NUMBER_ERRORS 6
+
+static isError_t nodeVerify (node_t* node, node_t** visited_nodes, int* counter);
+static void printStartDump (FILE* log_file_html, func_data* f_data, int count_log_files);
+static void printMainInfoTree (FILE* log_file_html, const tree_t* tree);
+static void printImage (FILE* log_file_html, int count_log_files);
+static void printErrorsInLog (FILE* log_file_html, int global_code_error);
 
 storageListErrors errors[NUMBER_ERRORS] = { {HAVE_NO_ERRORS,          code_HAVE_NO_ERRORS,          "you have no any error!!!!",     true },
                                             {ERR_FAIL_INIT_TREE,      code_ERR_FAIL_INIT_TREE,      "failed to init tree!",          false},
@@ -50,7 +56,8 @@ void printErrors()
 }
 
 #ifndef NDEBUG
-isError_t treeVerify (tree_t* tree, const char* file_name, const char* func_name, int line)
+
+isError_t treeVerify (const tree_t* tree, const char* file_name, const char* func_name, int line)
 {
     int global_code_error = 0;
     //func_data f_data = {file_name, func_name, line};
@@ -102,6 +109,7 @@ isError_t treeVerify (tree_t* tree, const char* file_name, const char* func_name
 }
 
 #endif
+
 isError_t nodeVerify (node_t* node, node_t** visited_nodes, int* counter)
 {
     if (node == nullptr) return NO_ERRORS;
@@ -124,7 +132,7 @@ isError_t nodeVerify (node_t* node, node_t** visited_nodes, int* counter)
     else                         return verifyLeft;
 }
 
-void treeDump (tree_t* tree, const char* file_name, const char* func_name, int line,
+void treeDump (const tree_t* tree, const char* file_name, const char* func_name, int line,
                int global_code_error, int count_log_files, node_t* deleted_node, const char* reason, ...)
 {
     FILE* log_file_html = fopen("graphDump.html", "a");
@@ -171,11 +179,11 @@ void printStartDump (FILE* log_file_html, func_data* f_data, int count_log_files
     #endif
     fprintf(log_file_html, "<!DOCTYPE html>\n");
     fprintf(log_file_html, "<html lang = 'ru'>\n");
-    fprintf(log_file_html, "<head>\n");
-    fprintf(log_file_html, "<style>\n");
+    fprintf(log_file_html, "<head>\n"  );
+    fprintf(log_file_html, "<style>\n" );
     fprintf(log_file_html, "body { background-color: #cfa8ceff }\n");
     fprintf(log_file_html, "</style>\n");
-    fprintf(log_file_html, "</head>\n");
+    fprintf(log_file_html, "</head>\n" );
     fprintf(log_file_html, "<body>\n\n");
     fprintf(log_file_html, "<h3 align=\"center\"> TreeDump called from %s:%d from func %s</h3>\n", f_data->file_name, f_data->line, f_data->func_name);
     fprintf(log_file_html, "<pre>\n");
@@ -209,7 +217,7 @@ void printErrorsInLog (FILE* log_file_html, int global_code_error)
     return;
 }
 
-void printMainInfoTree (FILE* log_file_html, tree_t* tree)
+void printMainInfoTree (FILE* log_file_html, const tree_t* tree)
 {
     assert(log_file_html && tree);
 
